@@ -11,8 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class HomeSetupStatusRequestDto {
-    private Long id;
     private Boolean isCompleted = Boolean.FALSE;
-    private Long task_id;
-    private Long patient_id;
 }
