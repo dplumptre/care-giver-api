@@ -15,4 +15,5 @@ public class HomeSetupStatusDto {
     private Boolean isCompleted = Boolean.FALSE;
     private String taskTitle;
     private String taskDescription;
+    private User user;
 }

@@ -32,6 +32,10 @@ public class HomeSetupStatus {
     @JoinColumn(name = "patient_id")
     private Patient patient;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User carer;
+
 
     @CreationTimestamp
     @Column(name = "created_at",updatable = false)
