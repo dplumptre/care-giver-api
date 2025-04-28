@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("home-setup")
+@RequestMapping("api/home-setup")
 public class HomeSetupStatusController {
 
     @Autowired
@@ -34,7 +34,7 @@ public class HomeSetupStatusController {
             @PathVariable Long patient_id,
             @RequestBody HomeSetupUpdateRequest request) {
 
-        homeSetupStatusService.updateTaskStatus(patient_id, request);
+        homeSetupStatusService.updateTaskStatus(patient_id, request,authUtil.loggedInUser());
         return ResponseEntity.ok(new APIResponse<>(true, "Task updated successfully", null));
     }
 
@@ -49,7 +49,13 @@ public class HomeSetupStatusController {
         }
 
         return ResponseEntity.ok(new APIResponse<>(true, "Home setup is fully complete.", true));
+    }
 
+
+    @GetMapping("/stars")
+    public ResponseEntity<APIResponse<Integer>> homeSetupStars() {
+        Integer starsNumber = homeSetupStatusService.getHomeStatusStars(authUtil.loggedInUser().getUserId());
+        return ResponseEntity.ok(new APIResponse<>(true, "number of stars successfully displayed.", starsNumber));
     }
 
 

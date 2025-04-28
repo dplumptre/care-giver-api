@@ -61,8 +61,6 @@ public class PatientServiceImpl implements PatientService {
             homeSetupStatus.setTask(task);
             homeSetupStatus.setPatient(savedPatient);
             homeSetupStatus.setCarer(user);
-
-
             homeSetupStatus.setIsCompleted(false);
             statusList.add(homeSetupStatus);
         }

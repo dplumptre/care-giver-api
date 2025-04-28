@@ -1,21 +1,15 @@
 package com.overallheuristic.care_giver.service.impl;
 
 import com.overallheuristic.care_giver.dto.HomeSetupStatusDto;
-import com.overallheuristic.care_giver.dto.payload.HomeSetupStatusRequestDto;
 import com.overallheuristic.care_giver.dto.payload.HomeSetupUpdateRequest;
 import com.overallheuristic.care_giver.exceptions.APIException;
-import com.overallheuristic.care_giver.model.HomeSetupStatus;
-import com.overallheuristic.care_giver.model.Patient;
-import com.overallheuristic.care_giver.model.Task;
-import com.overallheuristic.care_giver.model.User;
-import com.overallheuristic.care_giver.repositories.HomeSetupStatusRepository;
-import com.overallheuristic.care_giver.repositories.PatientRepository;
-import com.overallheuristic.care_giver.repositories.TaskRepository;
-import com.overallheuristic.care_giver.repositories.UserRepository;
+import com.overallheuristic.care_giver.model.*;
+import com.overallheuristic.care_giver.repositories.*;
 import com.overallheuristic.care_giver.service.HomeSetupStatusService;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -25,13 +19,15 @@ public class HomeSetupStatusServiceImpl implements HomeSetupStatusService {
     private  ModelMapper modelMapper;
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
+    private HomeSetupResultRepository homeSetupResultRepository;
 
-    public HomeSetupStatusServiceImpl(PatientRepository patientRepository, HomeSetupStatusRepository homeSetupStatusRepository, ModelMapper modelMapper, TaskRepository taskRepository, UserRepository userRepository) {
+    public HomeSetupStatusServiceImpl(PatientRepository patientRepository, HomeSetupResultRepository homeSetupResultRepository, HomeSetupStatusRepository homeSetupStatusRepository, ModelMapper modelMapper, TaskRepository taskRepository, UserRepository userRepository) {
         this.patientRepository = patientRepository;
         this.homeSetupStatusRepository = homeSetupStatusRepository;
         this.modelMapper = modelMapper;
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
+        this.homeSetupResultRepository  = homeSetupResultRepository;
     }
 
     @Override
@@ -55,7 +51,7 @@ public class HomeSetupStatusServiceImpl implements HomeSetupStatusService {
     }
 
     @Override
-    public void updateTaskStatus(Long patientId, HomeSetupUpdateRequest request) {
+    public void updateTaskStatus(Long patientId, HomeSetupUpdateRequest request,User user) {
         Patient patient = patientRepository.findById(patientId)
                 .orElseThrow(() -> new APIException("Patient not found"));
 
@@ -67,6 +63,34 @@ public class HomeSetupStatusServiceImpl implements HomeSetupStatusService {
 
         status.setIsCompleted(request.getIsCompleted());
         homeSetupStatusRepository.save(status);
+
+        if(!request.getIsCompleted()) {
+            HomeSetupResult selectedHomeSetup = homeSetupResultRepository.findByCarerAndPatient(user, patient);
+            if(selectedHomeSetup != null) {
+                homeSetupResultRepository.delete(selectedHomeSetup);
+            }
+        }
+
+        List<HomeSetupStatus> allStatuses = homeSetupStatusRepository.findAllByCarerAndPatient(user, patient);
+
+        boolean allComplete = allStatuses.stream().allMatch(HomeSetupStatus::getIsCompleted);
+
+        if (!allComplete) {
+            return;
+        }
+
+        boolean resultExists = homeSetupResultRepository.existsByCarerAndPatient(user, patient);
+        if (resultExists) {
+            return;
+        }
+
+        HomeSetupResult result = new HomeSetupResult();
+        result.setCarer(user);
+        result.setPatient(patient);
+        result.setIsCompleted(true);
+        result.setCompletedAt(LocalDateTime.now());
+        homeSetupResultRepository.save(result);
+
     }
 
     @Override
@@ -82,5 +106,13 @@ public class HomeSetupStatusServiceImpl implements HomeSetupStatusService {
         if (statuses.isEmpty()) return false;
 
         return statuses.stream().allMatch(HomeSetupStatus::getIsCompleted);
+    }
+
+    @Override
+    public Integer getHomeStatusStars(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        List<HomeSetupResult> response = homeSetupResultRepository.findAllByCarerAndIsCompletedIsTrue(user);
+        return response.size();
     }
 }

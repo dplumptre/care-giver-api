@@ -23,4 +23,8 @@ public interface HomeSetupStatusRepository extends JpaRepository<HomeSetupStatus
     List<HomeSetupStatus> findAllByPatientAndCarer(Patient patient, User user);
 
     boolean existsByPatientAndTaskAndCarer(Patient patient, Task task, User user);
+
+    List<HomeSetupStatus> findAllByCarerAndIsCompletedIsTrue(User user);
+
+    List<HomeSetupStatus> findAllByCarerAndPatient(User user, Patient patient);
 }
