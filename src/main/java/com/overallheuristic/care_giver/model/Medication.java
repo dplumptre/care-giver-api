@@ -13,6 +13,12 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(
+        name = "medication",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"patient_id", "drug_name"})
+        }
+)
 public class Medication {
 
     @Id
