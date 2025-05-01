@@ -1,12 +1,15 @@
 package com.overallheuristic.care_giver.controller;
 
 import com.overallheuristic.care_giver.dto.APIResponse;
+import com.overallheuristic.care_giver.dto.MedicationDto;
 import com.overallheuristic.care_giver.dto.payload.MedicationRequestDto;
 import com.overallheuristic.care_giver.service.MedicationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("api/medications")
@@ -20,6 +23,18 @@ public class MedicationController {
     public ResponseEntity<APIResponse<String>> createMedication(@RequestBody MedicationRequestDto request) {
         String response = medicationService.createMedicationWithDosageTimes(request);
         return new ResponseEntity<>(new APIResponse<>(true,"successfully created", response), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/patients/{patientId}")
+    public ResponseEntity<APIResponse<List<MedicationDto>>> getMedications(@PathVariable Long patientId) {
+        List <MedicationDto> response = medicationService.getMedications(patientId);
+        return new ResponseEntity<>(new APIResponse<>(true,"Medication List", response), HttpStatus.OK);
+    }
+
+    @GetMapping("/{medicationId}")
+    public ResponseEntity<APIResponse<MedicationDto>> getMedication(@PathVariable Long medicationId) {
+        MedicationDto response = medicationService.getMedication(medicationId);
+        return new ResponseEntity<>(new APIResponse<>(true,"Medication", response), HttpStatus.OK);
     }
 
 
