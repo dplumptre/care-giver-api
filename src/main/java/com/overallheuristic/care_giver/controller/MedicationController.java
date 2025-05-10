@@ -2,6 +2,7 @@ package com.overallheuristic.care_giver.controller;
 
 import com.overallheuristic.care_giver.dto.APIResponse;
 import com.overallheuristic.care_giver.dto.MedicationDto;
+import com.overallheuristic.care_giver.dto.payload.MedicationLogRequestDto;
 import com.overallheuristic.care_giver.dto.payload.MedicationRequestDto;
 import com.overallheuristic.care_giver.service.MedicationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,13 @@ public class MedicationController {
     public ResponseEntity<APIResponse<String>> updateMedication(@PathVariable Long medicationId, @RequestBody MedicationRequestDto request) {
         String response = medicationService.updateMedicationWithDosageTimes(medicationId, request);
         return new ResponseEntity<>(new APIResponse<>(true,"successfully Updated", response), HttpStatus.OK);
+    }
+
+
+    @PostMapping("add-medication-log")
+    public ResponseEntity<APIResponse<String>> createMedicationLog(@RequestBody MedicationLogRequestDto request) {
+        String response = medicationService.createMedicationLog(request);
+        return new ResponseEntity<>(new APIResponse<>(true,"successfully created Log", response), HttpStatus.CREATED);
     }
 
 }

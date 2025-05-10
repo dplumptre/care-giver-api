@@ -2,12 +2,15 @@ package com.overallheuristic.care_giver.service.impl;
 
 import com.overallheuristic.care_giver.dto.DosageTimeDto;
 import com.overallheuristic.care_giver.dto.MedicationDto;
+import com.overallheuristic.care_giver.dto.payload.MedicationLogRequestDto;
 import com.overallheuristic.care_giver.dto.payload.MedicationRequestDto;
 import com.overallheuristic.care_giver.exceptions.APIException;
 import com.overallheuristic.care_giver.model.DosageTime;
 import com.overallheuristic.care_giver.model.Medication;
+import com.overallheuristic.care_giver.model.MedicationLog;
 import com.overallheuristic.care_giver.model.Patient;
 import com.overallheuristic.care_giver.repositories.DosageTimeRepository;
+import com.overallheuristic.care_giver.repositories.MedicationLogRepository;
 import com.overallheuristic.care_giver.repositories.MedicationRepository;
 import com.overallheuristic.care_giver.repositories.PatientRepository;
 import com.overallheuristic.care_giver.service.MedicationService;
@@ -15,6 +18,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -23,12 +27,14 @@ public class MedicationServiceImpl implements MedicationService {
     private final MedicationRepository medicationRepository;
     private final DosageTimeRepository dosageTimeRepository;
     private final ModelMapper modelMapper;
+    private final MedicationLogRepository medicationLogRepository;
 
-    public MedicationServiceImpl(PatientRepository patientRepository, MedicationRepository medicationRepository, DosageTimeRepository dosageTimeRepository, ModelMapper modelMapper) {
+    public MedicationServiceImpl(PatientRepository patientRepository, MedicationRepository medicationRepository, DosageTimeRepository dosageTimeRepository, ModelMapper modelMapper, MedicationLogRepository medicationLogRepository) {
         this.patientRepository = patientRepository;
         this.medicationRepository = medicationRepository;
         this.dosageTimeRepository = dosageTimeRepository;
         this.modelMapper = modelMapper;
+        this.medicationLogRepository = medicationLogRepository;
     }
 
     @Override
@@ -101,10 +107,7 @@ public class MedicationServiceImpl implements MedicationService {
                 dosageTimeRepository.save(newDt);
             }
         }
-
-
         return "medication updated successfully";
-
     }
 
     @Override
@@ -149,11 +152,25 @@ public class MedicationServiceImpl implements MedicationService {
 
         MedicationDto medicationDto = new MedicationDto();
         medicationDto.setId(medication.getId());
+        medicationDto.setDrugName(medication.getDrugName());
         medicationDto.setDosage(medication.getDosage());
         medicationDto.setPatient(medication.getPatient());
         medicationDto.setDosageTimes(dosageTimeList);
         return medicationDto;
 
+    }
+
+    @Override
+    public String createMedicationLog(MedicationLogRequestDto request) {
+
+       Patient patient = patientRepository.findById(request.getPatientId()).orElseThrow( ()-> new APIException("Patient not found"));
+        MedicationLog medicationLog = new MedicationLog();
+        medicationLog.setScheduledFor(request.getScheduledFor());
+        medicationLog.setPatient(patient);
+        medicationLog.setAction(request.getAction());
+        medicationLog.setLoggedAt(LocalDateTime.now());
+        medicationLogRepository.save(medicationLog);
+        return "medication log created successfully";
 
     }
 }
