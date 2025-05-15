@@ -7,7 +7,6 @@ import com.overallheuristic.care_giver.repositories.*;
 import com.overallheuristic.care_giver.security.jwt.AuthEntryPointJwt;
 import com.overallheuristic.care_giver.security.jwt.AuthTokenFilter;
 import com.overallheuristic.care_giver.security.services.UserDetailsServiceImpl;
-import com.overallheuristic.care_giver.utils.enums.VideoType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -24,8 +23,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 
 @Configuration

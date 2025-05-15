@@ -1,5 +1,6 @@
 package com.overallheuristic.care_giver.model;
 
+import com.overallheuristic.care_giver.utils.enums.ActivityType;
 import com.overallheuristic.care_giver.utils.enums.MedicationAction;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -26,12 +27,6 @@ public class MedicationLog {
     @ManyToOne
     @JoinColumn(name = "patient_id")
     private Patient patient;
-
-
-
-
-
-
 
 
 }

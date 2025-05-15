@@ -2,6 +2,7 @@ package com.overallheuristic.care_giver.controller;
 
 import com.overallheuristic.care_giver.dto.APIResponse;
 import com.overallheuristic.care_giver.dto.MedicationDto;
+import com.overallheuristic.care_giver.dto.MedicationResultDto;
 import com.overallheuristic.care_giver.dto.payload.MedicationLogRequestDto;
 import com.overallheuristic.care_giver.dto.payload.MedicationRequestDto;
 import com.overallheuristic.care_giver.service.MedicationService;
@@ -58,6 +59,13 @@ public class MedicationController {
     public ResponseEntity<APIResponse<String>> createMedicationLog(@RequestBody MedicationLogRequestDto request) {
         String response = medicationService.createMedicationLog(request);
         return new ResponseEntity<>(new APIResponse<>(true,"successfully created Log", response), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/result/{patientId}")
+    public ResponseEntity<APIResponse<MedicationResultDto>> getStreak(@PathVariable Long patientId) {
+        MedicationResultDto result = medicationService.calculateStreakForPatient(patientId);
+        return new ResponseEntity<>(new APIResponse<>(true,"successfully created Log", result), HttpStatus.OK);
+
     }
 
 }

@@ -4,17 +4,15 @@ package com.overallheuristic.care_giver.service.impl;
 import com.overallheuristic.care_giver.dto.VideoDto;
 import com.overallheuristic.care_giver.dto.payload.VideoRequestDto;
 import com.overallheuristic.care_giver.exceptions.APIException;
-import com.overallheuristic.care_giver.exceptions.ResourceNotFoundException;
 import com.overallheuristic.care_giver.model.Video;
 import com.overallheuristic.care_giver.repositories.VideoRepository;
 import com.overallheuristic.care_giver.service.VideoService;
-import com.overallheuristic.care_giver.utils.enums.VideoType;
+import com.overallheuristic.care_giver.utils.enums.ActivityType;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class VideoServiceImpl implements VideoService {
@@ -41,7 +39,7 @@ public class VideoServiceImpl implements VideoService {
 
 
 
-    public List<VideoDto> getVideos(Optional<VideoType> videoType) {
+    public List<VideoDto> getVideos(Optional<ActivityType> videoType) {
         List<Video> videos;
 
         if (videoType.isPresent()) {

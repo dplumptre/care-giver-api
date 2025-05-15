@@ -2,6 +2,7 @@ package com.overallheuristic.care_giver.service;
 
 
 import com.overallheuristic.care_giver.dto.MedicationDto;
+import com.overallheuristic.care_giver.dto.MedicationResultDto;
 import com.overallheuristic.care_giver.dto.payload.MedicationLogRequestDto;
 import com.overallheuristic.care_giver.dto.payload.MedicationRequestDto;
 
@@ -19,4 +20,6 @@ public interface MedicationService {
     MedicationDto getMedication(Long medicationId);
 
     String createMedicationLog(MedicationLogRequestDto request);
+
+    MedicationResultDto calculateStreakForPatient(Long patientId);
 }

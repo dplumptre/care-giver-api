@@ -1,8 +1,6 @@
 package com.overallheuristic.care_giver.service.impl;
 
 import com.overallheuristic.care_giver.dto.ExerciseResultDto;
-import com.overallheuristic.care_giver.dto.ExerciseSessionDto;
-import com.overallheuristic.care_giver.dto.PatientDto;
 import com.overallheuristic.care_giver.dto.payload.ExerciseSessionRequestDto;
 import com.overallheuristic.care_giver.exceptions.APIException;
 import com.overallheuristic.care_giver.model.*;
@@ -11,10 +9,8 @@ import com.overallheuristic.care_giver.repositories.ExerciseSessionRepository;
 import com.overallheuristic.care_giver.repositories.PatientRepository;
 import com.overallheuristic.care_giver.repositories.VideoRepository;
 import com.overallheuristic.care_giver.service.ExerciseSessionService;
-import com.overallheuristic.care_giver.utils.AuthUtil;
 import com.overallheuristic.care_giver.utils.StreakCalculator;
-import com.overallheuristic.care_giver.utils.enums.VideoType;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.overallheuristic.care_giver.utils.enums.ActivityType;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -91,9 +87,9 @@ public class ExerciseSessionServiceImpl implements ExerciseSessionService {
         Map<Integer, String> carerBadgeMap = new HashMap<>();
 
         for (Badge badge : badges) {
-            if (badge.getVideoType() == VideoType.PATIENT_EXERCISE_SUPPORT) {
+            if (badge.getActivityType() == ActivityType.PATIENT_EXERCISE_SUPPORT) {
                 patientBadgeMap.put(badge.getStreakDays(), badge.getName());
-            } else if (badge.getVideoType() == VideoType.CARER_EXERCISE) {
+            } else if (badge.getActivityType() == ActivityType.CARER_EXERCISE) {
                 carerBadgeMap.put(badge.getStreakDays(), badge.getName());
             }
         }
