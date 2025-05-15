@@ -2,7 +2,7 @@ package com.overallheuristic.care_giver.model;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.overallheuristic.care_giver.utils.enums.VideoType;
+import com.overallheuristic.care_giver.utils.enums.ActivityType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,7 +26,7 @@ public class Badge {
     private Long id;
     private String name;
     @Enumerated(EnumType.STRING)
-    private VideoType videoType;
+    private ActivityType activityType;
     private Integer streakDays;
     @Column(name = "patient_required", nullable = true)
     private Integer patientRequired;

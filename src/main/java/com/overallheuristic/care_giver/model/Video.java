@@ -1,7 +1,7 @@
 package com.overallheuristic.care_giver.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.overallheuristic.care_giver.utils.enums.VideoType;
+import com.overallheuristic.care_giver.utils.enums.ActivityType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -10,7 +10,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.validator.constraints.URL;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -34,7 +33,7 @@ public class Video {
     private String description;
     private String link;
     @Enumerated(EnumType.STRING)
-    private VideoType videoType = VideoType.LEARNING_HUB;
+    private ActivityType videoType = ActivityType.LEARNING_HUB;
 
     @OneToMany(mappedBy = "video")
     @JsonIgnore

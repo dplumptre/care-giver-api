@@ -2,20 +2,26 @@ package com.overallheuristic.care_giver.service.impl;
 
 import com.overallheuristic.care_giver.dto.DosageTimeDto;
 import com.overallheuristic.care_giver.dto.MedicationDto;
+import com.overallheuristic.care_giver.dto.MedicationResultDto;
+import com.overallheuristic.care_giver.dto.payload.MedicationLogRequestDto;
 import com.overallheuristic.care_giver.dto.payload.MedicationRequestDto;
 import com.overallheuristic.care_giver.exceptions.APIException;
-import com.overallheuristic.care_giver.model.DosageTime;
-import com.overallheuristic.care_giver.model.Medication;
-import com.overallheuristic.care_giver.model.Patient;
-import com.overallheuristic.care_giver.repositories.DosageTimeRepository;
-import com.overallheuristic.care_giver.repositories.MedicationRepository;
-import com.overallheuristic.care_giver.repositories.PatientRepository;
+import com.overallheuristic.care_giver.model.*;
+import com.overallheuristic.care_giver.repositories.*;
 import com.overallheuristic.care_giver.service.MedicationService;
+import com.overallheuristic.care_giver.utils.enums.ActivityType;
+import com.overallheuristic.care_giver.utils.enums.MedicationAction;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class MedicationServiceImpl implements MedicationService {
@@ -23,12 +29,16 @@ public class MedicationServiceImpl implements MedicationService {
     private final MedicationRepository medicationRepository;
     private final DosageTimeRepository dosageTimeRepository;
     private final ModelMapper modelMapper;
+    private final MedicationLogRepository medicationLogRepository;
+    private final BadgeRepository badgeRepository;
 
-    public MedicationServiceImpl(PatientRepository patientRepository, MedicationRepository medicationRepository, DosageTimeRepository dosageTimeRepository, ModelMapper modelMapper) {
+    public MedicationServiceImpl(PatientRepository patientRepository, MedicationRepository medicationRepository, DosageTimeRepository dosageTimeRepository, ModelMapper modelMapper, MedicationLogRepository medicationLogRepository, BadgeRepository badgeRepository) {
         this.patientRepository = patientRepository;
         this.medicationRepository = medicationRepository;
         this.dosageTimeRepository = dosageTimeRepository;
         this.modelMapper = modelMapper;
+        this.medicationLogRepository = medicationLogRepository;
+        this.badgeRepository = badgeRepository;
     }
 
     @Override
@@ -101,10 +111,7 @@ public class MedicationServiceImpl implements MedicationService {
                 dosageTimeRepository.save(newDt);
             }
         }
-
-
         return "medication updated successfully";
-
     }
 
     @Override
@@ -149,11 +156,77 @@ public class MedicationServiceImpl implements MedicationService {
 
         MedicationDto medicationDto = new MedicationDto();
         medicationDto.setId(medication.getId());
+        medicationDto.setDrugName(medication.getDrugName());
         medicationDto.setDosage(medication.getDosage());
         medicationDto.setPatient(medication.getPatient());
         medicationDto.setDosageTimes(dosageTimeList);
         return medicationDto;
 
+    }
+
+    @Override
+    public String createMedicationLog(MedicationLogRequestDto request) {
+
+       Patient patient = patientRepository.findById(request.getPatientId()).orElseThrow( ()-> new APIException("Patient not found"));
+        MedicationLog medicationLog = new MedicationLog();
+        medicationLog.setScheduledFor(request.getScheduledFor());
+        medicationLog.setPatient(patient);
+        medicationLog.setAction(request.getAction());
+        medicationLog.setLoggedAt(LocalDateTime.now());
+        medicationLogRepository.save(medicationLog);
+        return "medication log created successfully";
 
     }
+
+
+    public MedicationResultDto calculateStreakForPatient(Long patientId) {
+        List<MedicationLog> logs = medicationLogRepository.findByPatientIdOrderByScheduledForAsc(patientId);
+        if (logs.isEmpty()) return new MedicationResultDto(0, 0, 0, Collections.emptyList());
+
+        int points = 0;
+
+        // Set to collect unique days with at least one TAKE
+        Set<LocalDate> takeDays = new HashSet<>();
+
+        for (MedicationLog log : logs) {
+            if ("TAKE".equalsIgnoreCase(log.getAction().toString())) {
+
+                points++; // Each TAKE = 1 point
+
+                // Only 1 entry per day needed for streak
+                takeDays.add(log.getScheduledFor().toLocalDate());
+            }
+        }
+
+        if (takeDays.isEmpty()) {
+            return new MedicationResultDto(0, 0, 0, Collections.emptyList());
+        }
+
+        // Sort the unique TAKE days
+        List<LocalDate> sortedDays = takeDays.stream().sorted().toList();
+
+        int currentStreak = 1;
+        int longestStreak = 1;
+
+        for (int i = 1; i < sortedDays.size(); i++) {
+            LocalDate prev = sortedDays.get(i - 1);
+            LocalDate curr = sortedDays.get(i);
+
+            if (curr.equals(prev.plusDays(1))) {
+                currentStreak++;
+            } else {
+                currentStreak = 1;
+            }
+
+            longestStreak = Math.max(longestStreak, currentStreak);
+        }
+
+        List<Badge> earnedBadges = badgeRepository.findByActivityTypeAndStreakDaysLessThanEqual(
+                ActivityType.MEDICATION, currentStreak
+        );
+
+        return new MedicationResultDto(currentStreak, longestStreak, points, earnedBadges);
+    }
+
+
 }

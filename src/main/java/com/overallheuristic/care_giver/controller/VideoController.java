@@ -3,9 +3,8 @@ package com.overallheuristic.care_giver.controller;
 import com.overallheuristic.care_giver.dto.APIResponse;
 import com.overallheuristic.care_giver.dto.VideoDto;
 import com.overallheuristic.care_giver.dto.payload.VideoRequestDto;
-import com.overallheuristic.care_giver.model.Video;
 import com.overallheuristic.care_giver.service.VideoService;
-import com.overallheuristic.care_giver.utils.enums.VideoType;
+import com.overallheuristic.care_giver.utils.enums.ActivityType;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,7 +32,7 @@ public class VideoController {
 
     @GetMapping
     public ResponseEntity<APIResponse<List<VideoDto>>> listVideos(
-            @RequestParam(value = "type", required = false) VideoType type
+            @RequestParam(value = "type", required = false) ActivityType type
     ) {
         List<VideoDto> videosDto = videoService.getVideos(Optional.ofNullable(type));
         return ResponseEntity.ok(new APIResponse<>(true, "success", videosDto));

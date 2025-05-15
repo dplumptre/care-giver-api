@@ -13,7 +13,7 @@ import com.overallheuristic.care_giver.repositories.UserProgressLearningHubRepos
 import com.overallheuristic.care_giver.repositories.VideoRepository;
 import com.overallheuristic.care_giver.service.UserProgressLearningHubService;
 import com.overallheuristic.care_giver.utils.AuthUtil;
-import com.overallheuristic.care_giver.utils.enums.VideoType;
+import com.overallheuristic.care_giver.utils.enums.ActivityType;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,7 +64,7 @@ public class UserProgressLearningHubServiceImpl implements UserProgressLearningH
     @Override
     public UserProgressLearningHubResultDto getUsersProgressResult(User user, boolean isSuccessful) {
         Integer currentLevel =  userProgressLearningHubRepository.findByUserAndIsSuccessful(user, isSuccessful).size();
-        Integer level = videoRepository.findByVideoType(VideoType.LEARNING_HUB).size();
+        Integer level = videoRepository.findByVideoType(ActivityType.LEARNING_HUB).size();
 
         String levelName;
         if (currentLevel == 0) {

@@ -1,6 +1,6 @@
 package com.overallheuristic.care_giver.utils.enums;
 
-public enum VideoType {
+public enum ActivityType {
     LEARNING_HUB,
     CARER_EXERCISE,
     PATIENT_EXERCISE_SUPPORT,
