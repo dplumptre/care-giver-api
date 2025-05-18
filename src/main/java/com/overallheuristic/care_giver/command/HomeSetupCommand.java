@@ -35,7 +35,7 @@ public class HomeSetupCommand implements CommandLineRunner {
     public void run(String... args) {
         List<Patient> allPatients = patientRepository.findAll();
         List<Task> allTasks = taskRepository.findAll();
-        User user = userRepository.findByEmail("max@aol.com").orElseThrow( ()-> new APIException(("No user")));
+        User user = userRepository.findByEmail("user@example.com").orElseThrow( ()-> new APIException(("No user")));
 
         for (Patient patient : allPatients) {
             for (Task task : allTasks) {

@@ -101,191 +101,71 @@ public class WebSecurityConfig {
     }
 
 
-    @Bean
-    public CommandLineRunner initData(
-            RoleRepository roleRepository,
-            UserRepository userRepository,
-            PasswordEncoder passwordEncoder,
-            LevelRepository levelRepository,
-            VideoRepository videoRepository,
-            BadgeRepository badgeRepository,
-            TaskRepository taskRepository
-    ) {
-        return args -> {
-            // Retrieve or create roles
-            Role userRole = roleRepository.findByRoleName(AppRole.ROLE_USER)
-                    .orElseGet(() -> {
-                        Role newUserRole = new Role(AppRole.ROLE_USER);
-                        return roleRepository.save(newUserRole);
-                    });
-
-            Role sellerRole = roleRepository.findByRoleName(AppRole.ROLE_SELLER)
-                    .orElseGet(() -> {
-                        Role newSellerRole = new Role(AppRole.ROLE_SELLER);
-                        return roleRepository.save(newSellerRole);
-                    });
-
-            Role adminRole = roleRepository.findByRoleName(AppRole.ROLE_ADMIN)
-                    .orElseGet(() -> {
-                        Role newAdminRole = new Role(AppRole.ROLE_ADMIN);
-                        return roleRepository.save(newAdminRole);
-                    });
-
-            Set<Role> userRoles = Set.of(userRole);
-            Set<Role> sellerRoles = Set.of(sellerRole);
-            Set<Role> adminRoles = Set.of(userRole, sellerRole, adminRole);
-
-
-            // Create users if not already present
-            if (!userRepository.existsByUserName("john")) {
-                User user1 = new User("john", "John Doe","user@example.com", passwordEncoder.encode("password"));
-                userRepository.save(user1);
-            }
-
-            if (!userRepository.existsByUserName("seller")) {
-                User seller1 = new User("seller", "Seller Man","seller1@example.com", passwordEncoder.encode("password2"));
-                userRepository.save(seller1);
-            }
-
-            if (!userRepository.existsByUserName("admin")) {
-                User admin = new User("admin",  "Joseph","admin@example.com",passwordEncoder.encode("adminPass"));
-                userRepository.save(admin);
-            }
-
-            // Update roles for existing users
-            userRepository.findByUserName("john").ifPresent(user -> {
-                user.setRoles(userRoles);
-                userRepository.save(user);
-            });
-
-            userRepository.findByUserName("seller").ifPresent(seller -> {
-                seller.setRoles(sellerRoles);
-                userRepository.save(seller);
-            });
-
-            userRepository.findByUserName("admin").ifPresent(admin -> {
-                admin.setRoles(adminRoles);
-                userRepository.save(admin);
-            });
-
-
-//            String[] levelNames = {
-//                    "Bronze", "Silver", "Gold", "Platinum", "Diamond",
-//                    "Emerald", "Ruby", "Sapphire", "Master", "Champion"
-//            };
+//    @Bean
+//    public CommandLineRunner initData(
+//            RoleRepository roleRepository,
+//            UserRepository userRepository,
+//            PasswordEncoder passwordEncoder
+//    ) {
+//        return args -> {
+//            // Retrieve or create roles
+//            Role userRole = roleRepository.findByRoleName(AppRole.ROLE_USER)
+//                    .orElseGet(() -> {
+//                        Role newUserRole = new Role(AppRole.ROLE_USER);
+//                        return roleRepository.save(newUserRole);
+//                    });
 //
-//            for (int i = 0; i < levelNames.length; i++) {
-//                String levelName = levelNames[i];
+//            Role sellerRole = roleRepository.findByRoleName(AppRole.ROLE_SELLER)
+//                    .orElseGet(() -> {
+//                        Role newSellerRole = new Role(AppRole.ROLE_SELLER);
+//                        return roleRepository.save(newSellerRole);
+//                    });
 //
-//                // Check if level with the same name exists
-//                if (levelRepository.findByLevelName(levelName).isEmpty()) {
-//                    Level level = new Level();
-//                    level.setLevelName(levelName);
-//                    level.setLevelNumber(i + 1);
-//                    level.setScore(100);
-//                    levelRepository.save(level);
-//                }
+//            Role adminRole = roleRepository.findByRoleName(AppRole.ROLE_ADMIN)
+//                    .orElseGet(() -> {
+//                        Role newAdminRole = new Role(AppRole.ROLE_ADMIN);
+//                        return roleRepository.save(newAdminRole);
+//                    });
+//
+//            Set<Role> userRoles = Set.of(userRole);
+//            Set<Role> sellerRoles = Set.of(sellerRole);
+//            Set<Role> adminRoles = Set.of(userRole, sellerRole, adminRole);
+//
+//
+//            // Create users if not already present
+//            if (!userRepository.existsByUserName("john")) {
+//                User user1 = new User("john", "John Doe","user@example.com", passwordEncoder.encode("Service1#"));
+//                userRepository.save(user1);
 //            }
-
-
-
-
-// Videos
-
-//            String[] titles = {
-//                    "What is Stroke",
-//                    "Caregiver Guide  Move Stroke Survivors Safely",
-//                    "Exercise For Stroke Survivors",
-//                    "Self Care for Caregivers  5 Minute Routine",
-//            };
 //
-//            String[] linkCodes = {
-//                    "No7eawZMmWo",
-//                    "w5DvsZAmH-A",
-//                    "pxyh7fWi4rs",
-//                    "eo6w7muVrmo"
-//            };
-//
-//            VideoType[] videoTypes = {
-//                    VideoType.LEARNING_HUB,
-//                    VideoType.LEARNING_HUB,
-//                    VideoType.PATIENT_EXERCISE_SUPPORT,
-//                    VideoType.CARER_EXERCISE
-//            };
-//
-//            for (int i = 0; i < titles.length; i++) {
-//                String title = titles[i];
-//                String linkCode = linkCodes[i];
-//                VideoType videoType = videoTypes[i];
-//
-//                 Video myVee = videoRepository.findByTitle(title);
-//                if (myVee == null) {
-//                    Video video = new Video();
-//                    video.setTitle(title);
-//                    video.setLink(linkCode);
-//                    video.setVideoType(videoType);
-//                    video.setDescription("goal is to help them feel supported from head to toe");
-//                    videoRepository.save(video);
-//                }
+//            if (!userRepository.existsByUserName("seller")) {
+//                User seller1 = new User("seller", "Seller Man","seller1@example.com", passwordEncoder.encode("Service1#"));
+//                userRepository.save(seller1);
 //            }
-
-
-
-
 //
-//
-//            Badge badge1 = Badge.builder()
-//                    .name("Carer 1-Day Streak")
-//                    .videoType(VideoType.CARER_EXERCISE)
-//                    .streakDays(1)
-//                    .icon("carer_1d.png")
-//                    .build();
-//
-//            Badge badge2 = Badge.builder()
-//                    .name("Carer 7-Day Streak")
-//                    .videoType(VideoType.CARER_EXERCISE)
-//                    .streakDays(7)
-//                    .icon("carer_7d.png")
-//                    .build();
-//
-//            Badge badge3 = Badge.builder()
-//                    .name("Patient 1-Day Streak")
-//                    .videoType(VideoType.PATIENT_EXERCISE_SUPPORT)
-//                    .streakDays(1)
-//                    .patientRequired(1)
-//                    .icon("patient_1d.png")
-//                    .build();
-//
-//            Badge badge4 = Badge.builder()
-//                    .name("Patient 7-Day Streak")
-//                    .videoType(VideoType.PATIENT_EXERCISE_SUPPORT)
-//                    .streakDays(7)
-//                    .patientRequired(1)
-//                    .icon("patient_7d.png")
-//                    .build();
-//
-//            Badge badge5 = Badge.builder()
-//                    .name("Carer Medication Streak")
-//                    .videoType(VideoType.MEDICATION)
-//                    .streakDays(7)
-//                    .icon("meds_7d.png")
-//                    .build();
-//
-//            List<Badge> demoBadges = List.of(badge1, badge2, badge3, badge4, badge5);
-//
-//            for (Badge badge : demoBadges) {
-//                boolean exists = badgeRepository
-//                        .findByNameAndVideoTypeAndStreakDays(
-//                                badge.getName(),
-//                                badge.getVideoType(),
-//                                badge.getStreakDays()
-//                        ).isPresent();
-//
-//                if (!exists) {
-//                    badgeRepository.save(badge);
-//                }
+//            if (!userRepository.existsByUserName("admin")) {
+//                User admin = new User("admin",  "Joseph","admin@example.com",passwordEncoder.encode("Service1#"));
+//                userRepository.save(admin);
 //            }
-        };
-    }
+//
+//            // Update roles for existing users
+//            userRepository.findByUserName("john").ifPresent(user -> {
+//                user.setRoles(userRoles);
+//                userRepository.save(user);
+//            });
+//
+//            userRepository.findByUserName("seller").ifPresent(seller -> {
+//                seller.setRoles(sellerRoles);
+//                userRepository.save(seller);
+//            });
+//
+//            userRepository.findByUserName("admin").ifPresent(admin -> {
+//                admin.setRoles(adminRoles);
+//                userRepository.save(admin);
+//            });
+//
+//
+//        };
+//    }
 
 }
