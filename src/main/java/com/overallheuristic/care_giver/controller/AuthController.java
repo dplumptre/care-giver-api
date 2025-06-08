@@ -6,12 +6,15 @@ import com.overallheuristic.care_giver.dto.APIResponse;
 import com.overallheuristic.care_giver.dto.LoginDto;
 import com.overallheuristic.care_giver.dto.SignupDto;
 import com.overallheuristic.care_giver.dto.UserInfoResponse;
+import com.overallheuristic.care_giver.dto.payload.EmailRequestDto;
+import com.overallheuristic.care_giver.dto.payload.ResetRequestDto;
 import com.overallheuristic.care_giver.model.Role;
 import com.overallheuristic.care_giver.model.User;
 import com.overallheuristic.care_giver.repositories.RoleRepository;
 import com.overallheuristic.care_giver.repositories.UserRepository;
 import com.overallheuristic.care_giver.security.jwt.JwtUtils;
 import com.overallheuristic.care_giver.security.services.UserDetailsImpl;
+import com.overallheuristic.care_giver.service.PasswordResetService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -45,6 +48,9 @@ public class AuthController {
 
     @Autowired
     PasswordEncoder passwordEncoder;
+
+    @Autowired
+    PasswordResetService passwordResetService;
 
 
 
@@ -171,6 +177,21 @@ public class AuthController {
         //  return ResponseEntity.ok(response);
         return ResponseEntity.ok(response);
 
+    }
+
+
+    @PostMapping("/forget-password")
+    public ResponseEntity<APIResponse<String>> forgetPassword(@Valid @RequestBody EmailRequestDto emailRequestDto) {
+        String response = passwordResetService.passwordReset(emailRequestDto);
+        return ResponseEntity.ok(new APIResponse<>(true, response, "success"));
+    }
+
+
+
+    @PostMapping("/reset-password/{email}")
+        public ResponseEntity<APIResponse<String>> resetPassword(@Valid @RequestBody ResetRequestDto resetDto, @PathVariable String email) {
+        String response = passwordResetService.passwordResetByCode(resetDto,email);
+        return ResponseEntity.ok(new APIResponse<>(true, response, "success"));
     }
 
 

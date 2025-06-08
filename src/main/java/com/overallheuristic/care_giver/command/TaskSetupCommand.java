@@ -4,12 +4,14 @@ import com.overallheuristic.care_giver.model.Badge;
 import com.overallheuristic.care_giver.model.Task;
 import com.overallheuristic.care_giver.repositories.TaskRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@Order(2)
 public class TaskSetupCommand implements CommandLineRunner {
 
     private final TaskRepository taskRepository;

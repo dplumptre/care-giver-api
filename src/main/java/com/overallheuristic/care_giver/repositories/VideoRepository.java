@@ -15,4 +15,6 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
     List<Video> findByVideoType(ActivityType videoType);
 
     Optional<Video> findFirstByVideoType(ActivityType activityType);
+
+    Optional<Video> findFirstByTitle(String whatIsStroke);
 }

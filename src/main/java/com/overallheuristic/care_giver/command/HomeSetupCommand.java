@@ -11,11 +11,13 @@ import com.overallheuristic.care_giver.repositories.TaskRepository;
 import com.overallheuristic.care_giver.repositories.UserRepository;
 import com.overallheuristic.care_giver.utils.AuthUtil;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
+@Order(7)
 public class HomeSetupCommand implements CommandLineRunner {
 
 

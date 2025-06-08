@@ -12,11 +12,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 
 @Component
+@Order(6)
 public class QuestionCommand implements CommandLineRunner {
 
     private final VideoRepository videoRepository;
@@ -35,29 +37,24 @@ public class QuestionCommand implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Map question text to activity type
-        Map<String, ActivityType> questions = new LinkedHashMap<>();
+        Optional<Video> firstVideo = videoRepository.findFirstByTitle("What is Stroke");
+        Optional<Video> secondVideo = videoRepository.findFirstByTitle("Caregiver Guide  Move Stroke Survivors Safely"); // Change if different type
 
-        questions.put("What happens during a stroke", ActivityType.LEARNING_HUB);
-        questions.put("Which type of stroke is caused by a blockage, like a blood clot, stopping blood from reaching the brain", ActivityType.LEARNING_HUB);
-        questions.put("In the FAST acronym for spotting stroke signs, what does the 'S' stand for", ActivityType.LEARNING_HUB);
-        questions.put("Which of the following is a risk factor for stroke", ActivityType.LEARNING_HUB);
-        questions.put("Why is a stroke considered a medical emergency", ActivityType.LEARNING_HUB);
-        questions.put("What is the first step before transferring a stroke patient from bed to wheelchair", ActivityType.LEARNING_HUB);
-        questions.put("When helping a stroke patient sit at the edge of the bed, what is important to do", ActivityType.LEARNING_HUB);
-        questions.put("Where should the wheelchair be placed during a bed-to-chair transfer", ActivityType.LEARNING_HUB);
-        questions.put("What should caregivers avoid doing when transferring a stroke patient", ActivityType.LEARNING_HUB);
-        questions.put("Why is proper positioning in bed important for stroke patients", ActivityType.LEARNING_HUB);
-        questions.put("What is the caregiver's primary role when supporting a stroke survivor with walking", ActivityType.PATIENT_EXERCISE_SUPPORT);
-        questions.put("Which of these is a recommended warm-up exercise before standing or walking", ActivityType.PATIENT_EXERCISE_SUPPORT);
-        questions.put("When helping a stroke survivor stand up, where should the caregiver provide support", ActivityType.PATIENT_EXERCISE_SUPPORT);
-        questions.put("How should you guide a stroke survivor during assisted walking", ActivityType.PATIENT_EXERCISE_SUPPORT);
-        questions.put("What is a good way to help a stroke survivor cool down after walking practice", ActivityType.PATIENT_EXERCISE_SUPPORT);
-        questions.put("Why is deep breathing an important part of the caregiver stress relief routine", ActivityType.CARER_EXERCISE);
-        questions.put("Which of the following is a technique used to release neck and shoulder tension", ActivityType.CARER_EXERCISE);
-        questions.put("What is the purpose of the overhead reach and side stretch in the routine", ActivityType.CARER_EXERCISE);
-        questions.put("How can caregivers gently activate their lower body during this routine", ActivityType.CARER_EXERCISE);
-        questions.put("What is the final affirmation at the end of the routine meant to do", ActivityType.CARER_EXERCISE);
+        if (firstVideo.isEmpty() || secondVideo.isEmpty()) {
+            log.info("Missing required videos");
+            return;
+        }
+
+        List<QuestionSeed> seeds = List.of(
+                new QuestionSeed("What happens during a stroke", firstVideo.get()),
+                new QuestionSeed("Which type of stroke is caused by a blockage, like a blood clot, stopping blood from reaching the brain", firstVideo.get()),
+                new QuestionSeed("In the FAST acronym for spotting stroke signs, what does the 'S' stand for", firstVideo.get()),
+                new QuestionSeed("Which of the following is a risk factor for stroke", firstVideo.get()),
+                new QuestionSeed("What is the first step before transferring a stroke patient from bed to wheelchair", secondVideo.get()),
+                new QuestionSeed("When helping a stroke patient sit at the edge of the bed, what is important to do", secondVideo.get()),
+                new QuestionSeed("Where should the wheelchair be placed during a bed-to-chair transfer", secondVideo.get()),
+                new QuestionSeed("What should caregivers avoid doing when transferring a stroke patient", secondVideo.get())
+        );
 
         // Map question text to answer options
         Map<String, List<AnswerOptionData>> optionsData = new LinkedHashMap<>();
@@ -118,78 +115,41 @@ public class QuestionCommand implements CommandLineRunner {
                 new AnswerOptionData("Making sure brakes are locked", false)
         ));
 
-        optionsData.put("Why is proper positioning in bed important for stroke patients", List.of(
-                new AnswerOptionData("To make the bed look neat", false),
-                new AnswerOptionData("To improve circulation and prevent pressure sores", true),
-                new AnswerOptionData("So they can sleep longer", false),
-                new AnswerOptionData("To reduce medication use", false)
-        ));
-
-        for (Map.Entry<String, ActivityType> entry : questions.entrySet()) {
-            String questionText = entry.getKey();
-            ActivityType activityType = entry.getValue();
-
-            Optional<Question> existingQuestion = questionRepository.findByQuestion(questionText);
 
 
-            Question question;
+        for (QuestionSeed seed : seeds) {
+            String questionText = seed.text();
+            Video video = seed.video();
 
+            Question question = questionRepository.findByQuestion(questionText)
+                    .orElseGet(() -> {
+                        Question q = new Question();
+                        q.setQuestion(questionText);
+                        q.setVideo(video);
+                        return questionRepository.save(q);
+                    });
 
-            if (existingQuestion.isPresent()) {
-                Question q = existingQuestion.get();
-                log.info("Found existing question in DB: id={} text=\"{}\"", q.getId(), q.getQuestion());
-            } else {
-                Optional<Video> optionalVideo = videoRepository.findFirstByVideoType(activityType);
-                if (optionalVideo.isEmpty()) {
-                    log.info("No video found for activity type: " + activityType);
-                    continue;
-                }
-
-                question = new Question();
-                question.setQuestion(questionText);
-                question.setVideo(optionalVideo.get());
-
-                try {
-                    question = questionRepository.save(question);
-                    log.info("Created question: " + questionText);
-                } catch (Exception e) {
-                    log.info("Error saving question: " + questionText);
-                    continue; // skip to next question
-                }
-
-
-            // Only create options for LEARNING_HUB questions
-            if (activityType == ActivityType.LEARNING_HUB) {
-                List<AnswerOptionData> options = optionsData.get(questionText);
-                if (options == null) {
-                    log.info("No options provided for LEARNING_HUB question: " + questionText);
-                    continue;
-                }
-
-                for (AnswerOptionData opt : options) {
-                    try {
-                        boolean exists = answerOptionRepository.existsByQuestionAndAnswerOption(question, opt.text());
-                        if (exists) {
-                            log.info("Skipping duplicate option: " + opt.text());
-                            continue;
-                        }
-
-                        AnswerOption answerOption = new AnswerOption();
-                        answerOption.setQuestion(question);
-                        answerOption.setAnswerOption(opt.text());
-                        answerOption.setIsCorrect(opt.isCorrect());
-
-                        answerOptionRepository.save(answerOption);
-                        log.info("Saved option: " + opt.text());
-                    } catch (Exception e) {
-                        log.info("Error saving option: " + opt.text() + " for question: " + questionText);
-
-                    }
-                }
+            List<AnswerOptionData> options = optionsData.get(questionText);
+            if (options == null) {
+                log.info("No answer options for: " + questionText);
+                continue;
             }
-        }
+
+            for (AnswerOptionData opt : options) {
+                if (answerOptionRepository.existsByQuestionAndAnswerOption(question, opt.text())) {
+                    log.info("Skipping existing option: " + opt.text());
+                    continue;
+                }
+                AnswerOption answerOption = new AnswerOption();
+                answerOption.setQuestion(question);
+                answerOption.setAnswerOption(opt.text());
+                answerOption.setIsCorrect(opt.isCorrect());
+                answerOptionRepository.save(answerOption);
+            }
+
+            log.info("Saved question + options: {}", questionText);
         }
     }
-
+    private record QuestionSeed(String text, Video video) {}
     private record AnswerOptionData(String text, boolean isCorrect) {}
 }

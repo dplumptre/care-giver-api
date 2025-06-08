@@ -72,6 +72,8 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/api/auth/signup").permitAll()
+                                .requestMatchers("/api/auth/reset-password/**").permitAll()
+                                .requestMatchers("/api/auth/forget-password").permitAll()
                                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                                 .requestMatchers("/h2-console/**").permitAll()
                                 //.requestMatchers("/api/admin/**").permitAll()
@@ -101,71 +103,6 @@ public class WebSecurityConfig {
     }
 
 
-//    @Bean
-//    public CommandLineRunner initData(
-//            RoleRepository roleRepository,
-//            UserRepository userRepository,
-//            PasswordEncoder passwordEncoder
-//    ) {
-//        return args -> {
-//            // Retrieve or create roles
-//            Role userRole = roleRepository.findByRoleName(AppRole.ROLE_USER)
-//                    .orElseGet(() -> {
-//                        Role newUserRole = new Role(AppRole.ROLE_USER);
-//                        return roleRepository.save(newUserRole);
-//                    });
-//
-//            Role sellerRole = roleRepository.findByRoleName(AppRole.ROLE_SELLER)
-//                    .orElseGet(() -> {
-//                        Role newSellerRole = new Role(AppRole.ROLE_SELLER);
-//                        return roleRepository.save(newSellerRole);
-//                    });
-//
-//            Role adminRole = roleRepository.findByRoleName(AppRole.ROLE_ADMIN)
-//                    .orElseGet(() -> {
-//                        Role newAdminRole = new Role(AppRole.ROLE_ADMIN);
-//                        return roleRepository.save(newAdminRole);
-//                    });
-//
-//            Set<Role> userRoles = Set.of(userRole);
-//            Set<Role> sellerRoles = Set.of(sellerRole);
-//            Set<Role> adminRoles = Set.of(userRole, sellerRole, adminRole);
-//
-//
-//            // Create users if not already present
-//            if (!userRepository.existsByUserName("john")) {
-//                User user1 = new User("john", "John Doe","user@example.com", passwordEncoder.encode("Service1#"));
-//                userRepository.save(user1);
-//            }
-//
-//            if (!userRepository.existsByUserName("seller")) {
-//                User seller1 = new User("seller", "Seller Man","seller1@example.com", passwordEncoder.encode("Service1#"));
-//                userRepository.save(seller1);
-//            }
-//
-//            if (!userRepository.existsByUserName("admin")) {
-//                User admin = new User("admin",  "Joseph","admin@example.com",passwordEncoder.encode("Service1#"));
-//                userRepository.save(admin);
-//            }
-//
-//            // Update roles for existing users
-//            userRepository.findByUserName("john").ifPresent(user -> {
-//                user.setRoles(userRoles);
-//                userRepository.save(user);
-//            });
-//
-//            userRepository.findByUserName("seller").ifPresent(seller -> {
-//                seller.setRoles(sellerRoles);
-//                userRepository.save(seller);
-//            });
-//
-//            userRepository.findByUserName("admin").ifPresent(admin -> {
-//                admin.setRoles(adminRoles);
-//                userRepository.save(admin);
-//            });
-//
-//
-//        };
-//    }
+
 
 }
